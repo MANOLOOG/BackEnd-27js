@@ -2,6 +2,14 @@ const fs = require("fs");
 
 const db = "koders.json";
 
+const dbFile = (file) => {
+  fs.writeFileSync(file, "[]", "utf-8");
+};
+if (fs.existsSync(db)) {
+} else {
+  dbFile(db);
+}
+
 const contentString = fs.readFileSync(db, "utf8");
 const content = JSON.parse(contentString);
 
@@ -15,12 +23,14 @@ const listKoders = () => {
 };
 
 const removeKoder = (koderName) => {
+  if (!content.find((koder) => koder.name === koderName)) {
+    console.log(
+      `No se encontro el koder con el nombre: ${koderName}. Verifica el nombre e intentalo de nuevo`
+    );
+    process.exit(1);
+  }
   const remove = content.filter((koder) => koder.name !== koderName);
   fs.writeFileSync(db, JSON.stringify(remove));
-};
-
-const resetDatabase = () => {
-  fs.writeFileSync(db, "[]");
 };
 
 const command = process.argv[2];
@@ -28,6 +38,10 @@ const command = process.argv[2];
 switch (command) {
   case "add":
     const koderAdd = process.argv[3];
+    if (!koderAdd) {
+      console.log("Ingresa el nombre del Koder");
+      process.exit(1);
+    }
     addKoder(koderAdd);
     break;
   case "ls":
@@ -35,11 +49,16 @@ switch (command) {
     break;
   case "rm":
     const koderRemove = process.argv[3];
+    if (!koderRemove) {
+      console.log("Ingresa el nombre del Koder a Eliminar");
+      process.exit(1);
+    }
     removeKoder(koderRemove);
     break;
 
   case "reset":
-    resetDatabase();
+    dbFile(db);
+
     break;
   default:
     console.log("Comando no valido");
